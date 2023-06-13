@@ -1,0 +1,23 @@
+{
+  "name": "phonebook",
+  "version": "0.0.1",
+  "description": "I am using this repo to share my progress for a Full Stack Web Development course (Backend modules)",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MarioTawfelis/FullStack-WebDev-Backend.git"
+  },
+  "author": "Mario Tawfelis",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  }
+}
