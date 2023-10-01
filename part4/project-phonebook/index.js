@@ -25,12 +25,17 @@ app.get('/api/persons', (request, response) => {
     })
 })
 
-
 app.get('/info', (request, response) => {
     const numPersons = persons.length
     const currentDate = new Date()
 
     response.send(`Phonebook has info for ${numPersons} people <br/>  ${currentDate}`)
+})
+
+app.get('/api/persons/:id', (request, response) => {
+    Person.findById(request.params.id).then(person => {
+      response.json(person)
+    })
 })
 
 app.get('/api/persons/:id', (request,response) => {
@@ -54,7 +59,7 @@ app.delete('/api/persons/:id', (request,response) => {
 app.post('/api/persons', (request,response) => {
     const body = request.body
 
-    if (body.content == undefined){
+    if (!body.name || !body.number){
         return response.status(404).json({
             error: "content missing"
         })
