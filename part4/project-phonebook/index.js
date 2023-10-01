@@ -1,7 +1,11 @@
+require("dotenv").config();
+
 const express = require("express")
 const app = express()
 const morgan = require("morgan")
 const cors = require("cors");
+const Person = require('./models/person')
+
 
 morgan.token('req-body', (req) => {
     return JSON.stringify(req.body)
@@ -14,32 +18,13 @@ app.use(cors())
 app.use(express.static("build"));
 app.use(morgan(loggingFormat))
 
-let persons = [
-    { 
-      "id": 1,
-      "name": "Arto Hellas", 
-      "number": "040-123456"
-    },
-    { 
-      "id": 2,
-      "name": "Ada Lovelace", 
-      "number": "39-44-5323523"
-    },
-    { 
-      "id": 3,
-      "name": "Dan Abramov", 
-      "number": "12-43-234345"
-    },
-    { 
-      "id": 4,
-      "name": "Mary Poppendieck", 
-      "number": "39-23-6423122"
-    }
-]
 
 app.get('/api/persons', (request, response) => {
-    return response.json(persons)
+    Person.find({}).then(persons => {
+      response.json(persons)
+    })
 })
+
 
 app.get('/info', (request, response) => {
     const numPersons = persons.length
@@ -69,27 +54,21 @@ app.delete('/api/persons/:id', (request,response) => {
 app.post('/api/persons', (request,response) => {
     const body = request.body
 
-    if (persons.find(p => p.name === body.name)) {
-        return response.status(404).json({
-            error: "name must be unique"
-        })
-    }
-
-    if (!body.name || !body.number){
+    if (body.content == undefined){
         return response.status(404).json({
             error: "content missing"
         })
     }
 
-    const person = {
-        id: Math.random(1000),
-        name: body.name,
-        number: body.number
-    }
+    const person = new Person({
+        name : body.name,
+        number : body.number
+    })
 
-    persons = persons.concat(person)
+    person.save().then(savedPerson => {
+        response.json(savedPerson)
+    })
 
-    response.json(person)
 })
 
 const unknownEndpoint = (request, response) => {
@@ -98,7 +77,7 @@ const unknownEndpoint = (request, response) => {
   
 app.use(unknownEndpoint)
 
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
