@@ -24,46 +24,39 @@ app.get("/api/persons", (request, response) => {
   });
 });
 
-app.get("/info", (request, response) => {
-  const numPersons = persons.length;
-  const currentDate = new Date();
+app.get("/info", async (request, response) => {
+  try {
+    const numPersons = await Person.countDocuments();
+    const currentDate = new Date();
 
-  response.send(
-    `Phonebook has info for ${numPersons} people <br/>  ${currentDate}`
-  );
-});
+    const personOrPeople = numPersons === 1 ? "person" : "people";
 
-app.get("/api/persons/:id", (request, response) => {
-  Person.findById(request.params.id)
-        .then(person => {
-            if (person) {
-                response.json(person)
-            } else {
-                response.status(404).end()
-            }
-        })
-        .catch(error => {
-            console.log(error)
-            response.status(400).send({ error : 'malformatted id' })
-        })
-});
-
-app.get("/api/persons/:id", (request, response) => {
-  const id = Number(request.params.id);
-  const person = persons.find((person) => person.id === id);
-
-  if (person) {
-    response.json(person);
-  } else {
-    response.status(404).end();
+    response.send(
+      `Phonebook has info for ${numPersons} ${personOrPeople} <br/>  ${currentDate}`
+    );
+  } catch (error) {
+    response.status(500).json({ error: "Internal Server Error" });
   }
 });
 
-app.delete("/api/persons/:id", (request, response) => {
-  const id = Number(request.params.id);
-  persons = persons.filter((person) => person.id !== id);
+app.get("/api/persons/:id", (request, response, next) => {
+  Person.findById(request.params.id)
+    .then((person) => {
+      if (person) {
+        response.json(person);
+      } else {
+        response.status(404).end();
+      }
+    })
+    .catch((error) => next(error));
+});
 
-  response.status(204).end();
+app.delete("/api/persons/:id", (request, response, next) => {
+  Person.findByIdAndRemove(request.params.id)
+    .then((result) => {
+      response.status(204).end();
+    })
+    .catch((error) => next(error));
 });
 
 app.post("/api/persons", (request, response) => {
@@ -85,11 +78,39 @@ app.post("/api/persons", (request, response) => {
   });
 });
 
+app.put("/api/persons/:id", (request, response, next) => {
+  const body = request.body;
+
+  const person = {
+    name: body.name,
+    number: body.number,
+  };
+
+  Person.findByIdAndUpdate(request.params.id, person, { new: true })
+    .then((updatedPerson) => {
+      response.json(updatedPerson);
+    })
+    .catch((error) => next(error));
+});
+
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: "unknown endpoint" });
 };
 
 app.use(unknownEndpoint);
+
+const errorHandler = (error, request, response, next) => {
+  console.log(error);
+
+  if (error.name == "CastError") {
+    response.status(400).send({ error: "malformatted id" });
+  }
+
+  // If not, pass error to the defaul Express error handler
+  next(error);
+};
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
