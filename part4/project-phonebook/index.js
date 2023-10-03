@@ -1,122 +1,123 @@
-require("dotenv").config();
+require('dotenv').config()
 
-const express = require("express");
-const app = express();
-const morgan = require("morgan");
-const cors = require("cors");
-const Person = require("./models/person");
+const express = require('express')
+const app = express()
+const morgan = require('morgan')
+const cors = require('cors')
+const Person = require('./models/person')
 
-morgan.token("req-body", (req) => {
-  return JSON.stringify(req.body);
-});
+morgan.token('req-body', (req) => {
+  return JSON.stringify(req.body)
+})
 
 const loggingFormat =
-  ":method :url :status :res[content-length] - :response-time ms :req-body";
+  ':method :url :status :res[content-length] - :response-time ms :req-body'
 
-app.use(express.json());
-app.use(cors());
-app.use(express.static("build"));
-app.use(morgan(loggingFormat));
+app.use(express.json())
+app.use(cors())
+app.use(express.static('build'))
+app.use(morgan(loggingFormat))
 
-app.get("/api/persons", (request, response) => {
+app.get('/api/persons', (request, response) => {
   Person.find({}).then((persons) => {
-    response.json(persons);
-  });
-});
+    response.json(persons)
+  })
+})
 
-app.get("/info", async (request, response) => {
+app.get('/info', async (request, response) => {
   try {
-    const numPersons = await Person.countDocuments();
-    const currentDate = new Date();
+    const numPersons = await Person.countDocuments()
+    const currentDate = new Date()
 
-    const personOrPeople = numPersons === 1 ? "person" : "people";
+    const personOrPeople = numPersons === 1 ? 'person' : 'people'
 
     response.send(
       `Phonebook has info for ${numPersons} ${personOrPeople} <br/>  ${currentDate}`
-    );
+    )
   } catch (error) {
-    response.status(500).json({ error: "Internal Server Error" });
+    response.status(500).json({ error: 'Internal Server Error' })
   }
-});
+})
 
-app.get("/api/persons/:id", (request, response, next) => {
+app.get('/api/persons/:id', (request, response, next) => {
   Person.findById(request.params.id)
     .then((person) => {
       if (person) {
-        response.json(person);
+        response.json(person)
       } else {
-        response.status(404).end();
+        response.status(404).end()
       }
     })
-    .catch((error) => next(error));
-});
+    .catch((error) => next(error))
+})
 
-app.delete("/api/persons/:id", (request, response, next) => {
+app.delete('/api/persons/:id', (request, response, next) => {
   Person.findByIdAndRemove(request.params.id)
-    .then((result) => {
-      response.status(204).end();
+    // eslint-disable-next-line no-unused-vars
+    .then(result => {
+      response.status(204).end()
     })
-    .catch((error) => next(error));
-});
+    .catch((error) => next(error))
+})
 
-app.post("/api/persons", (request, response, next) => {
-  const body = request.body;
+app.post('/api/persons', (request, response, next) => {
+  const body = request.body
 
   if (!body.name || !body.number) {
     return response.status(404).json({
-      error: "content missing",
-    });
+      error: 'content missing',
+    })
   }
 
   const person = new Person({
     name: body.name,
     number: body.number,
-  });
+  })
 
   person.save()
     .then((savedPerson) => {
-        response.json(savedPerson);
+      response.json(savedPerson)
     })
     .catch(error => next(error))
-});
+})
 
-app.put("/api/persons/:id", (request, response, next) => {
-  const { name, number } = request.body;
+app.put('/api/persons/:id', (request, response, next) => {
+  const { name, number } = request.body
 
 
   Person.findByIdAndUpdate(
-        request.params.id, 
-        { name, number }, 
-        { new: true, runValidators: true, context: 'query' }
-    )
+    request.params.id,
+    { name, number },
+    { new: true, runValidators: true, context: 'query' }
+  )
     .then((updatedPerson) => {
-      response.json(updatedPerson);
+      response.json(updatedPerson)
     })
-    .catch((error) => next(error));
-});
+    .catch((error) => next(error))
+})
 
 const unknownEndpoint = (request, response) => {
-  response.status(404).send({ error: "unknown endpoint" });
-};
+  response.status(404).send({ error: 'unknown endpoint' })
+}
 
-app.use(unknownEndpoint);
+app.use(unknownEndpoint)
 
 const errorHandler = (error, request, response, next) => {
-  console.log(error);
+  console.log(error)
 
-  if (error.name == "CastError") {
-    response.status(400).send({ error: "malformatted id" });
-  } else if (error.name == "ValidationError") {
+  if (error.name === 'CastError') {
+    response.status(400).send({ error: 'malformatted id' })
+  } else if (error.name === 'ValidationError') {
     response.status(400).send({ error: error.message })
   }
 
   // If not, pass error to the defaul Express error handler
-  next(error);
-};
+  next(error)
+}
 
-app.use(errorHandler);
+app.use(errorHandler)
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+  console.log(`Server running on port ${PORT}`)
+})
