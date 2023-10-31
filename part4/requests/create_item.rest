@@ -1,8 +1,9 @@
 POST http://localhost:3003/api/blogs
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1hcmlvdGF3IiwiaWQiOiI2NTNmYjM4MzM3NmFlNDQyYjMyZGI3ZTUiLCJpYXQiOjE2OTg3NjI4Nzh9.NMsjO9o4M5c5Y8BNi5mo5FmBBW3Z3AeWzgiofMN-g_o
 
 {
-  "title": "blah blah",
+  "title": "Testing Token Authorization",
   "author": "Some  blah",
   "url": "www.blah.com",
   "likes": 6,
