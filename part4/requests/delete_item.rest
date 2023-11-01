@@ -1,11 +1,3 @@
-POST http://localhost:3003/api/blogs
+DELETE http://localhost:3003/api/blogs/65425c85a069a4ee2ec61187
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1hcmlvdGF3IiwiaWQiOiI2NTNmYjM4MzM3NmFlNDQyYjMyZGI3ZTUiLCJpYXQiOjE2OTg3NjI4Nzh9.NMsjO9o4M5c5Y8BNi5mo5FmBBW3Z3AeWzgiofMN-g_o
-
-{
-  "title": "Testing",
-  "author": "Some  blah",
-  "url": "www.blah.com",
-  "likes": 6,
-  "userId": "653fb383376ae442b32db7e5"
-}
